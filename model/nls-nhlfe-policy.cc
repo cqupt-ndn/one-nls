@@ -1,0 +1,107 @@
+#ifndef NLS_NHLFE_POLICY_CC
+#define NLS_NHLFE_POLICY_CC
+
+#include "ns3/log.h"
+#include "ns3/assert.h"
+#include "ns3/uinteger.h"
+#include "ns3/integer.h"
+#include "ns3/boolean.h"
+#include <functional>
+
+#include "nls-nhlfe-policy.h"
+namespace ns3{
+namespace nls{
+
+NS_OBJECT_ENSURE_REGISTERED (NhlfeSelectionPolicy);
+
+TypeId
+NhlfeSelectionPolicy::GetTypeId (void)
+{
+  static TypeId tid = TypeId ("ns3::nls::NhlfeSelectionPolicy")
+    .SetParent<Object> ()
+    .AddConstructor<NhlfeSelectionPolicy> () 
+    .AddAttribute ("MaxPacketsInTxQueue", 
+                   "The maximum number of packets in Queue",
+                   IntegerValue (-1),
+                   MakeIntegerAccessor (&NhlfeSelectionPolicy::m_maxPackets),
+                   MakeIntegerChecker<int32_t> ())
+    .AddAttribute ("MaxBytesInTxQueue", 
+                   "The maximum number of bytes in Queue.",
+                   IntegerValue (-1),
+                   MakeIntegerAccessor (&NhlfeSelectionPolicy::m_maxBytes),
+                   MakeIntegerChecker<int32_t> ())
+  ;
+  return tid;
+}
+
+NhlfeSelectionPolicy::NhlfeSelectionPolicy ()
+  : m_maxPackets (-1),
+    m_maxBytes (-1)
+{
+
+}
+
+NhlfeSelectionPolicy::~NhlfeSelectionPolicy()
+{
+}
+
+const Nhlfe&
+NhlfeSelectionPolicy::Get (const std::vector<Nhlfe> &nhlfe, uint32_t index)
+{
+  if (index == 0) 
+    {
+        DoStart (nhlfe.size ());
+    }
+
+  return DoGet (nhlfe, index);
+}
+
+bool
+NhlfeSelectionPolicy::Select (const std::vector<Nhlfe> &nhlfe, uint32_t index, 
+  const Ptr<const Interface> &interface, const Ptr<const Packet> &packet)
+{
+  Ptr<Queue> queue = interface->GetDevice ()->GetQueue ();
+  
+  if (queue != 0)
+    {
+      if (m_maxPackets >=0 && queue->GetNPackets () > (uint32_t)m_maxPackets)
+        {
+          return false;
+        }
+      if (m_maxBytes >=0 && queue->GetNBytes () > (uint32_t)m_maxBytes)
+        {
+          return false;
+        }
+    }
+    
+  return DoSelect (nhlfe, index, interface, packet);
+}
+
+void
+NhlfeSelectionPolicy::DoStart (uint32_t size)
+{
+}
+
+const Nhlfe&
+NhlfeSelectionPolicy::DoGet (const std::vector<Nhlfe> &nhlfe, uint32_t index)
+{
+  return nhlfe[index];
+}
+
+bool
+NhlfeSelectionPolicy::DoSelect (const std::vector<Nhlfe> &nhlfe, uint32_t index, 
+  const Ptr<const Interface> &interface, const Ptr<const Packet> &packet)
+{
+  return true;
+}
+
+void
+NhlfeSelectionPolicy::Print (std::ostream &os) const
+{
+  os << "default policy";
+}
+
+}//namespace ns3
+}//namespace nls
+
+#endif

@@ -1,0 +1,51 @@
+#include <algorithm>
+
+#include "ns3/log.h"
+#include "ns3/assert.h"
+#include "ns3/simulator.h"
+#include "ns3/ipv4-host-address.h"
+
+#include "ldp-status-codes.h"
+#include "common-session-params-tlv.h"
+#include "status-tlv.h"
+#include "ldp-peer.h"
+
+NS_LOG_COMPONENT_DEFINE ("LdpPeer");
+
+namespace ns3{
+namespace nldp{
+using namespace nls;
+const uint16_t LdpPeer::NOTIFICATION_MESSAGE   = 0x0001;
+const uint16_t LdpPeer::INITIALIZATION_MESSAGE = 0x0200;
+const uint16_t LdpPeer::KEEPALIVE_MESSAGE      = 0x0201;
+
+NldpPeer::NldpPeer (Ptr<LdpProtocol> ldp)
+  : m_ldp (ldp),    
+    m_reader (0),
+    m_holdTime (0),
+    m_keepAliveTime (60),
+    m_sendKeepAliveTime (-1),
+    m_maxPduLength (0),
+    m_routerId (0),
+    m_messageId (0),
+    m_labelSeqNum (16),
+    m_ifIndex (-1),
+    m_active (false),
+    m_availLabel (0x10),
+    m_unavailLabel (0x10000)
+{
+  NS_LOG_FUNCTION (this);
+
+  NS_ASSERT (m_ldp != 0);
+
+  m_labelListIter = m_labels.begin ();
+}
+NldpPeer::~NldpPeer ()
+{
+  NS_LOG_FUNCTION (this);
+  m_ldp = 0;
+}
+
+
+}//namespace nldp;
+}//namespace ns3;

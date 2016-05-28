@@ -1,0 +1,87 @@
+#ifndef NLS_PROTOCOL_H
+#define NLS_PROTOCOL_H
+
+#include <vector>
+
+#include "ns3/object.h"
+#include "ns3/ptr.h"
+#include "ns3/net-device.h"
+#include "ns3/packet.h"
+#include "ns3/traced-callback.h"
+
+#include "nls.h"
+#include "nls-node.h"
+#include "nls-label.h"
+#include "nls-interface.h"
+#include "nls-label-stack.h"
+#include "nls-forwarding-information.h"
+#include "nls-incoming-label-map.h"
+#include "nls-fec-to-nhlfe.h"
+#include "nls-nhlfe.h"
+#include "nls-packet-demux.h"
+
+#include "nls-nhlfe-policy.h"
+
+#include "nls-traces.h"
+#include "nls-forwarding-strategy.h"
+namespace ns3{
+namespace nls{
+class NlsProtocol:public Nls
+{
+public:
+  static TypeId GetTypeId (void);
+
+  NlsProtocol ();
+  virtual ~NlsProtocol ();
+  
+   //获得Nls节点;
+  Ptr<NlsNode> GetNlsNode() const;
+  
+  //设备中添加NlS Interface;
+  Ptr<Interface> AddInterface (Ptr<NetDevice>& device) ;
+ 
+  //根据index获得Nls Interface
+  Ptr<Interface> GetInterface (uint8_t index) const;
+
+  //获得某一设备上的Interface
+  Ptr<Interface> GetInterfaceForDevice (const Ptr<const NetDevice>& device) const;
+  //获得添加的Interface数量
+  uint32_t GetNInterfaces (void) const;
+  
+  bool ReceiveInterest (const Ptr<ns3::ndn::Interest> &interest,bool flag);
+
+  bool ReceiveInterest (const Ptr<ns3::ndn::Interest> &interest);
+  
+  void ReceiveData (const Ptr<ns3::ndn::Data> data);
+  
+  void ReceiveNls (Ptr<NetDevice> device, Ptr<const Packet> p, uint16_t protocol, const Address &from,const Address &to, NetDevice::PacketType packetType);
+  void NlsForward (const Ptr<Packet> &packet, const Ptr<ForwardingInformation> &fwd, LabelStack &stack);
+  bool RealNlsForward (const Ptr<Packet> &packet, const Nhlfe &nhlfe, LabelStack &stack,
+                          const Ptr<Interface> &outInterface, const Mac48Address &hwaddr);
+  void InterestForward(const Ptr<ns3::ndn::Interest> &interest, Ptr<ns3::ndn::Face> &m_face);
+protected:
+  virtual void DoDispose (void);
+  virtual void NotifyNewAggregate ();
+
+private:
+  typedef std::vector<Ptr<Interface> > InterfaceList;
+
+  
+  void NdnForward (const Ptr<Packet> &packet, Ptr<NetDevice> outDev);
+
+  Ptr<NlsNode> m_node;  
+  InterfaceList m_interfaces;
+  bool m_interfaceAutoInstall;
+
+  //Ptr<nls::NlsForwardingStrategy> m_nlsForwardingStrategy;
+  PacketDemux m_demux;
+  
+  traces::TxTracedCallback m_txTrace;
+  traces::RxTracedCallback m_rxTrace;
+  traces::DropTracedCallback m_dropTrace;  
+ 
+};
+
+}//namespace nls
+}//namespace ns3
+#endif

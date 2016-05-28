@@ -1,0 +1,18 @@
+#ifndef NLS_STACK_HELP_H
+#define NLS_STACK_HELP_H
+
+#include "ns3/ndn-stack-helper.h"
+
+namespace ns3{
+namespace nls{
+
+class NlsStackHelper : public ns3::nls::StackHelper
+{
+public:
+     NlsStackHelper();
+     ~NlsStackHelper();
+
+};
+}//namespace nls
+}//namespace ns3
+#endif

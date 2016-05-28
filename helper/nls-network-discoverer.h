@@ -1,0 +1,55 @@
+#ifndef NLS_NETWORK_DISCOVER_H
+#define NLS_NETWORK_DISCOVER_H
+
+#include "ns3/ptr.h"
+#include "ns3/node.h"
+#include "ns3/node-container.h"
+#include "ns3/net-device.h"
+#include "ns3/nls.h"
+#include "ns3/nls-interface.h"
+#include "ns3/sgi-hashmap.h"
+
+#include "nls-network-helper-base.h"
+
+namespace ns3
+{
+class NlsNetworkDiscoverer : public NlsNetworkHelperBase
+{
+public:
+   //构造函数
+   NlsNetworkDiscoverer(void);
+  
+   //NlsNetworkDiscoverer(const NlsNetworkDiscoverer& o);
+   //NlsNetworkDiscoverer& operator= (const NlsNetworkDiscoverer);
+  
+   // 析够函数
+    ~NlsNetworkDiscoverer();
+
+   //重要的方法
+   void DiscoverNetwork (void);
+
+private:
+
+class Vertex : public SimpleRefCount<Vertex>
+{
+public:
+    Vertex (const Mac48Address& hwaddr, const Ptr<nls::Interface> &interface);
+    ~Vertex ();
+    const Mac48Address& GetHwAddr (void) const;//获得MAC地址
+    const Ptr<nls::Interface>& GetInterface (void) const;//获得接口--Interface
+   // const Ptr<Vertex>& GetVertex (const Ipv4Address &addr);//根据输入的IP地址获得MAC，Interface
+   // const Ptr<Vertexes>& GetVertexes (void);
+    void Clear (void);
+  private:
+    Mac48Address m_hwaddr;
+    Ptr<nls::Interface> m_interface;
+    //Ptr<Vertexes> m_vertexes;
+};
+
+    bool UpdateVertex (const Ptr<NetDevice> &dev1, const Ptr<NetDevice> &dev2,
+                         const Ptr<Vertex> &vertex);
+    Ptr<Vertex> m_vertex;
+};
+  
+}//namespace ns3
+#endif

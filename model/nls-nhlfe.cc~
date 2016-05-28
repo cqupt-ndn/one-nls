@@ -1,0 +1,95 @@
+#ifndef NLS_NHLFE_CC
+#define NLS_NHLFE_CC
+
+#include "ns3/assert.h"
+#include "nls-nhlfe.h"
+
+namespace ns3{
+namespace nls{
+
+Nhlfe::Nhlfe(const Operation& op,int32_t outInterface,const Mac48Address& nextHop)
+      :m_interface(outInterface),
+       m_nextHop (nextHop)
+{
+ NS_ASSERT_MSG (outInterface >= 0, "Invalid outgoing interface index");
+ op.Accept (*this);//Operation中的方法 主要从putInterface 输出带标签的数据包
+}
+
+Nhlfe::Nhlfe(const Operation& op,Ptr< NetDevice > outNetDevice,const Mac48Address& nextHop)//添加15.12.18
+      :m_outNetDevice(outNetDevice),
+       m_nextHop (nextHop)
+{
+NS_ASSERT_MSG ( outNetDevice >= 0, "Invalid outgoing interface index");
+ op.Accept (*this);//Operation中的方法 主要从putInterface 输出带标签的数据包
+}
+
+Ptr<NetDevice>
+Nhlfe::GetOutNetDevice()
+{
+    return m_outNetDevice;
+}
+
+Nhlfe::~Nhlfe()
+{
+}
+
+Nhlfe::Nhlfe (const Operation& op)
+  : m_interface (-1)
+{
+  op.Accept (*this);
+}
+uint32_t Nhlfe::GetOpCode (void) const
+{
+   return m_opcode;
+}
+uint32_t Nhlfe::GetNLabels() const
+{
+ return m_count;
+}
+uint32_t 
+Nhlfe::GetLabel (uint32_t index) const
+{
+  return m_labels[index];
+}
+const Mac48Address& Nhlfe::GetNextHop (void) const
+{
+return m_nextHop;
+}
+int32_t Nhlfe::GetInterface() const
+{
+  return m_interface;
+}
+
+void Nhlfe::Print(std::ostream& os) const
+{
+
+switch (m_opcode) 
+    {
+      case OP_POP:
+        os << "pop";
+        break;
+      case OP_SWAP:
+        os << "swap";
+        for (uint32_t i = 0; i < m_count; ++i)
+          {
+            os << "," << Label (m_labels[i]);
+          }
+        break;
+    }
+
+  if (m_interface >= 0)
+    {
+      os << " outinterface " << m_interface;
+    }
+
+}
+
+std::ostream& operator<< (std::ostream& os, const Nhlfe& nhlfe)
+{
+  nhlfe.Print (os);
+  return os;
+}
+
+}//namespace nls
+}//namespace ns3
+#endif

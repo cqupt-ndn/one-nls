@@ -1,0 +1,29 @@
+#include "nls-stack-helper.h"
+
+#include "ns3/ndn-face-container.h"
+namespace ns3{
+
+namespace nls{
+
+NlsStackHelper::NlsStackHelper()
+{
+
+}
+
+NlsStackHelper::~NlsStackHelper()
+{
+
+}
+
+Ptr<ns3::ndn::StackHelper> NlsStackHelper::Install(Ptr<Node> node)
+{
+  m_stackHelper.Install(node);
+  return m_stackHelper;
+}
+Ptr<ns3::ndn::StackHelper> NlsStackHelper::GetStackHelper()
+{
+  return m_stackHelper;
+}
+
+}//namespace nls
+}//namespace ns3

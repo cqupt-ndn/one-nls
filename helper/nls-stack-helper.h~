@@ -1,0 +1,30 @@
+#ifndef NLS_STACK_HELP_H
+#define NLS_STACK_HELP_H
+
+#include "ns3/packet.h"
+#include "ns3/ptr.h"
+#include "ns3/object-factory.h"
+
+
+#include "ns3/ndn-stack-helper.h"
+//#include "ns3/node.h"
+namespace ns3{
+
+//class ndn::StackHelper;
+
+namespace nls{
+
+class NlsStackHelper  
+{
+public:
+     NlsStackHelper();
+     ~NlsStackHelper();
+     ns3::ndn::StackHelper Install(Ptr<Node> node);
+     ns3::ndn::StackHelper GetStackHelper();
+private:
+     static ns3::ndn::StackHelper m_stackHelper;
+
+};
+}//namespace nls
+}//namespace ns3
+#endif

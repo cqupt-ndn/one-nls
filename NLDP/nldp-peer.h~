@@ -1,0 +1,125 @@
+#ifndef LDP_PEER_H
+#define LDP_PEER_H
+#include "ns3/object.h"
+#include "ns3/event-id.h"
+#include "ns3/ptr.h"
+#include "ns3/simple-ref-count.h"
+#include "ns3/packet.h"
+//#include "ns3/address.h"
+//#include "ns3/socket.h"
+#include "ns3/mpls-lib-entry.h"
+
+#include "protocol-data-unit.h"
+#include "nldp-protocol.h"
+namespace ns3{
+namespace nldp{
+using namespace nls;
+
+class NldpProtocol;
+class NldpPeer: public SimpleRefCount<LdpPeer>
+{
+public:
+  static const uint16_t NOTIFICATION_MESSAGE;
+  static const uint16_t INITIALIZATION_MESSAGE;
+  static const uint16_t KEEPALIVE_MESSAGE;
+   
+  NldpPeer (Ptr<NldpProtocol> ldp);
+  virtual ~LdpPeer ();
+  
+  void Initialize (Ptr<Socket> socket, bool active);
+       /**
+   * \param ifIndex Interface index
+   */
+  void SetIfIndex (int32_t index);
+  /**
+   * \param ifIndex Interface index
+   */
+  int32_t GetIfIndex (void) const;
+  /**
+   * \param address transport address
+   */
+  void SetAddress (const Address &address);
+  /**
+   * \returns transport address
+   */
+  Address GetAddress (void) const;
+  /**
+   * \param routerId router identifier
+   */
+  void SetRouterId (uint32_t routerId);
+  /**
+   * \returns router identifier
+   */
+  uint32_t GetRouterId (void) const;
+  /**
+   * \param value session hold time
+   */
+  void SetHoldTime (uint16_t value);
+  /**
+   * \returns session hold time
+   */
+  uint16_t GetHoldTime (void) const;
+  /**
+   * \returns default keep alive time
+   */
+  uint16_t GetKeepAliveTime (void) const;
+  /**
+   * \returns default maximum pdu length
+   */
+  uint16_t GetMaxPduLength (void) const;
+  /**
+   * \returns true if session in active role
+   */
+  bool IsActiveRole (void) const;
+  /**
+   * \brief reset hold timeout
+   */
+  void ResetHoldTimeout (void);
+  /**
+   * \brief send messages to the peer
+   */
+  void Send (Ptr<Message> msg1);
+  /**
+   * \brief send messages to the peer
+   */
+  void Send (Ptr<Message> msg1, Ptr<Message> msg2);
+  /**
+   * \brief send messages to the peer
+   */
+  void Send (Ptr<Message> msg1, Ptr<Message> msg2, Ptr<Message> msg3);
+
+  uint32_t BindLabel (uint32_t outLabel = -1, int32_t outIfIndex = -1);
+  bool UnbindLabel (uint32_t label, uint32_t &outLabel, int32_t &outIfIndex);
+  void BindFec (const Ipv4Address &fec, uint32_t outLabel, int32_t outIfIndex);
+  bool UnbindFec (const Ipv4Address &fec);
+  bool UnbindFec (uint32_t outLabel, int32_t outIfIndex);
+  /**
+   * \param rejectReason reject reason
+   * \brief Soft session reject with the notification message
+   */
+  void Reject (uint32_t rejectReason);
+
+  typedef Callback<void, Ptr<LdpPeer>, Ptr<const Message> > MessageCallback;
+  typedef Callback<void, Ptr<const LdpPeer> > CloseCallback;
+
+  /**
+   * \param cb message callback
+   */
+  void SetMessageCallback (MessageCallback cb);
+  /**
+   * \param cb peer close callback
+   */
+  void SetCloseCallback (CloseCallback cb);
+private:
+  typedef std::list<std::pair<uint32_t, Ptr<MplsLibEntry> > > LabelList;
+  typedef std::list<std::pair<Ipv4Address, Ptr<MplsLibEntry> > > FecList;
+   LabelList m_labels;
+  LabelList::iterator m_labelListIter;
+
+};
+
+
+
+}//namespace nldp
+}//namespace ns3
+#endif
